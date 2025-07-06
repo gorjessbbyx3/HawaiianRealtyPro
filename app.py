@@ -51,21 +51,21 @@ def create_app():
     # Create upload directory
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
     
+    # Import models and routes
+    import models
+    import routes
+    
+    # Register routes
+    app.register_blueprint(routes.main_bp)
+    app.register_blueprint(routes.auth_bp)
+    app.register_blueprint(routes.property_bp)
+    app.register_blueprint(routes.realtor_bp)
+    app.register_blueprint(routes.booking_bp)
+    app.register_blueprint(routes.crm_bp)
+    
     with app.app_context():
-        # Import models and routes
-        import models
-        import routes
-        
         # Create tables
         db.create_all()
-        
-        # Register routes
-        app.register_blueprint(routes.main_bp)
-        app.register_blueprint(routes.auth_bp)
-        app.register_blueprint(routes.property_bp)
-        app.register_blueprint(routes.realtor_bp)
-        app.register_blueprint(routes.booking_bp)
-        app.register_blueprint(routes.crm_bp)
     
     return app
 

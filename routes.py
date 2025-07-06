@@ -369,6 +369,46 @@ def property_inquiry(property_id):
     flash('Please fill out all required fields', 'error')
     return redirect(url_for('property.property_detail', property_id=property_id))
 
+# Analytics route
+@crm_bp.route('/analytics')
+@login_required
+def analytics():
+    if current_user.role not in ['realtor', 'admin']:
+        flash('Access denied', 'error')
+        return redirect(url_for('main.index'))
+    
+    # Calculate analytics data
+    if current_user.role == 'realtor':
+        properties = Property.query.filter_by(realtor_id=current_user.id).all()
+        leads = Lead.query.filter_by(realtor_id=current_user.id).order_by(Lead.created_at.desc()).limit(5).all()
+        appointments = Appointment.query.filter_by(realtor_id=current_user.id).all()
+    else:  # admin
+        properties = Property.query.all()
+        leads = Lead.query.order_by(Lead.created_at.desc()).limit(5).all()
+        appointments = Appointment.query.all()
+    
+    # Calculate metrics
+    total_properties = len(properties)
+    total_leads = len(Lead.query.filter_by(realtor_id=current_user.id if current_user.role == 'realtor' else None).all() if current_user.role == 'realtor' else Lead.query.all())
+    total_appointments = len(appointments)
+    
+    # Calculate average property price
+    if properties:
+        avg_property_price = sum(p.price for p in properties) / len(properties)
+    else:
+        avg_property_price = 0
+    
+    # Get top performing properties (for demonstration)
+    top_properties = properties[:5] if properties else []
+    
+    return render_template('analytics.html',
+                         total_properties=total_properties,
+                         total_leads=total_leads,
+                         total_appointments=total_appointments,
+                         avg_property_price=avg_property_price,
+                         top_properties=top_properties,
+                         recent_leads=leads)
+
 # Template filters
 @main_bp.app_template_filter('currency')
 def currency_filter(amount):

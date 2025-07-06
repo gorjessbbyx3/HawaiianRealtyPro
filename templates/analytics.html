@@ -1,0 +1,445 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics Dashboard - Hawaii Elite Realty{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-5 pt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="text-primary-blue">
+                <i class="fas fa-chart-line me-2"></i>Analytics Dashboard
+            </h1>
+            <p class="lead text-muted">Comprehensive insights into your real estate performance</p>
+        </div>
+    </div>
+
+    <!-- Key Performance Indicators -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="kpi-icon mb-3">
+                        <i class="fas fa-home fa-2x text-primary"></i>
+                    </div>
+                    <h3 class="kpi-value text-primary">{{ total_properties }}</h3>
+                    <p class="kpi-label text-muted mb-0">Active Properties</p>
+                    <small class="text-success">
+                        <i class="fas fa-arrow-up me-1"></i>+12% this month
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="kpi-icon mb-3">
+                        <i class="fas fa-users fa-2x text-success"></i>
+                    </div>
+                    <h3 class="kpi-value text-success">{{ total_leads }}</h3>
+                    <p class="kpi-label text-muted mb-0">Active Leads</p>
+                    <small class="text-success">
+                        <i class="fas fa-arrow-up me-1"></i>+8% this week
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="kpi-icon mb-3">
+                        <i class="fas fa-calendar-check fa-2x text-warning"></i>
+                    </div>
+                    <h3 class="kpi-value text-warning">{{ total_appointments }}</h3>
+                    <p class="kpi-label text-muted mb-0">Scheduled Tours</p>
+                    <small class="text-success">
+                        <i class="fas fa-arrow-up me-1"></i>+15% this week
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="kpi-icon mb-3">
+                        <i class="fas fa-dollar-sign fa-2x text-info"></i>
+                    </div>
+                    <h3 class="kpi-value text-info">${{ avg_property_price | currency }}</h3>
+                    <p class="kpi-label text-muted mb-0">Average Price</p>
+                    <small class="text-success">
+                        <i class="fas fa-arrow-up me-1"></i>+5% this quarter
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Property Listings Chart -->
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Property Listings Trend
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="propertyTrendChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Lead Sources -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Lead Sources
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="leadSourceChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Property Performance and Lead Management -->
+    <div class="row mb-4">
+        <!-- Top Performing Properties -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-trophy me-2"></i>Top Performing Properties
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Property</th>
+                                    <th>Views</th>
+                                    <th>Inquiries</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for property in top_properties %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="property-thumbnail me-3">
+                                                {% if property.main_image() %}
+                                                <img src="{{ property.main_image().image_url }}" 
+                                                     class="rounded" width="50" height="40" 
+                                                     style="object-fit: cover;" alt="Property">
+                                                {% else %}
+                                                <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                                     style="width: 50px; height: 40px;">
+                                                    <i class="fas fa-home text-muted"></i>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">{{ property.title[:30] }}...</div>
+                                                <small class="text-muted">{{ property.city }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-primary">127</span></td>
+                                    <td><span class="badge bg-success">8</span></td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if property.status == 'active' else 'warning' }}">
+                                            {{ property.status.title() }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Lead Activity -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-clock me-2"></i>Recent Lead Activity
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        {% for lead in recent_leads %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-primary"></div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">{{ lead.name }}</h6>
+                                <p class="text-muted small mb-1">{{ lead.message[:50] }}...</p>
+                                <small class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>
+                                    {{ lead.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                </small>
+                                <div class="mt-2">
+                                    <span class="badge bg-{{ 'success' if lead.priority == 'high' else 'warning' if lead.priority == 'medium' else 'secondary' }}">
+                                        {{ lead.priority.title() }} Priority
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Market Analysis -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-area me-2"></i>Hawaiian Real Estate Market Analysis
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <canvas id="marketAnalysisChart" height="80"></canvas>
+                        </div>
+                        <div class="col-lg-4">
+                            <h6 class="text-primary-blue mb-3">Market Insights</h6>
+                            <div class="insight-item mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Oahu Market Growth</span>
+                                    <span class="text-success fw-bold">+12.5%</span>
+                                </div>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar bg-success" style="width: 75%"></div>
+                                </div>
+                            </div>
+                            <div class="insight-item mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Maui Luxury Segment</span>
+                                    <span class="text-info fw-bold">+8.3%</span>
+                                </div>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar bg-info" style="width: 65%"></div>
+                                </div>
+                            </div>
+                            <div class="insight-item mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Big Island Interest</span>
+                                    <span class="text-warning fw-bold">+15.7%</span>
+                                </div>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar bg-warning" style="width: 85%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.kpi-icon {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.kpi-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.kpi-label {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--light-gray);
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -23px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px var(--primary-blue);
+}
+
+.timeline-content {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.insight-item {
+    padding: 10px 0;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.insight-item:last-child {
+    border-bottom: none;
+}
+
+.property-thumbnail img {
+    border: 2px solid #f8f9fa;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .kpi-value {
+        font-size: 2rem;
+    }
+    
+    .timeline {
+        padding-left: 20px;
+    }
+    
+    .timeline-marker {
+        left: -18px;
+        width: 10px;
+        height: 10px;
+    }
+}
+</style>
+
+<script>
+// Property Trend Chart
+const propertyCtx = document.getElementById('propertyTrendChart').getContext('2d');
+new Chart(propertyCtx, {
+    type: 'line',
+    data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        datasets: [{
+            label: 'New Listings',
+            data: [12, 15, 18, 22, 25, 28],
+            borderColor: 'rgb(54, 162, 235)',
+            backgroundColor: 'rgba(54, 162, 235, 0.1)',
+            tension: 0.4
+        }, {
+            label: 'Sales',
+            data: [8, 11, 14, 16, 19, 22],
+            borderColor: 'rgb(75, 192, 192)',
+            backgroundColor: 'rgba(75, 192, 192, 0.1)',
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'top',
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+// Lead Sources Chart
+const leadCtx = document.getElementById('leadSourceChart').getContext('2d');
+new Chart(leadCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Website', 'Referrals', 'Social Media', 'Print Ads'],
+        datasets: [{
+            data: [45, 25, 20, 10],
+            backgroundColor: [
+                'rgba(54, 162, 235, 0.8)',
+                'rgba(75, 192, 192, 0.8)',
+                'rgba(255, 206, 86, 0.8)',
+                'rgba(255, 99, 132, 0.8)'
+            ],
+            borderWidth: 2,
+            borderColor: '#fff'
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom',
+            }
+        }
+    }
+});
+
+// Market Analysis Chart
+const marketCtx = document.getElementById('marketAnalysisChart').getContext('2d');
+new Chart(marketCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Oahu', 'Maui', 'Big Island', 'Kauai'],
+        datasets: [{
+            label: 'Average Price ($M)',
+            data: [4.2, 6.8, 2.1, 3.9],
+            backgroundColor: 'rgba(54, 162, 235, 0.8)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+        }, {
+            label: 'Market Activity',
+            data: [85, 72, 68, 61],
+            backgroundColor: 'rgba(75, 192, 192, 0.8)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'top',
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
