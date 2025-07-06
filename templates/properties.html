@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+
+{% block title %}Properties - Hawaii Elite Realty{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="text-primary-blue">
+                <i class="fas fa-home me-2"></i>Hawaii Properties
+            </h1>
+            <p class="lead text-muted">Discover your perfect piece of paradise</p>
+        </div>
+    </div>
+
+    <!-- Search Filters -->
+    <div class="search-filters mb-4">
+        <form method="GET" id="property-search-form" class="row g-3">
+            <div class="col-md-3">
+                {{ form.search_query.label(class="form-label") }}
+                {{ form.search_query(class="form-control filter-input", value=request.args.get('search_query', '')) }}
+            </div>
+            <div class="col-md-2">
+                {{ form.property_type.label(class="form-label") }}
+                {{ form.property_type(class="form-select filter-input") }}
+            </div>
+            <div class="col-md-2">
+                {{ form.min_price.label(class="form-label") }}
+                {{ form.min_price(class="form-control filter-input", value=request.args.get('min_price', '')) }}
+            </div>
+            <div class="col-md-2">
+                {{ form.max_price.label(class="form-label") }}
+                {{ form.max_price(class="form-control filter-input", value=request.args.get('max_price', '')) }}
+            </div>
+            <div class="col-md-2">
+                {{ form.city.label(class="form-label") }}
+                {{ form.city(class="form-select filter-input") }}
+            </div>
+            <div class="col-md-1">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+        
+        <div class="row mt-3">
+            <div class="col-md-3">
+                {{ form.min_bedrooms.label(class="form-label") }}
+                {{ form.min_bedrooms(class="form-control filter-input", value=request.args.get('min_bedrooms', '')) }}
+            </div>
+            <div class="col-md-3">
+                {{ form.max_bedrooms.label(class="form-label") }}
+                {{ form.max_bedrooms(class="form-control filter-input", value=request.args.get('max_bedrooms', '')) }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">&nbsp;</label>
+                <button type="button" id="clear-filters" class="btn btn-outline-secondary d-block w-100">
+                    <i class="fas fa-times me-1"></i>Clear Filters
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Summary -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <p class="text-muted mb-0">
+                    Showing {{ properties.items|length }} of {{ properties.total }} properties
+                    {% if request.args.get('search_query') %}
+                        for "{{ request.args.get('search_query') }}"
+                    {% endif %}
+                </p>
+                <div class="btn-group" role="group">
+                    <input type="radio" class="btn-check" name="view-type" id="grid-view" checked>
+                    <label class="btn btn-outline-primary" for="grid-view">
+                        <i class="fas fa-th-large"></i>
+                    </label>
+                    <input type="radio" class="btn-check" name="view-type" id="list-view">
+                    <label class="btn btn-outline-primary" for="list-view">
+                        <i class="fas fa-list"></i>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Properties Grid -->
+    <div class="row" id="properties-container">
+        {% for property in properties.items %}
+        <div class="col-lg-4 col-md-6 mb-4 property-item">
+            <div class="property-card">
+                <div class="property-image" 
+                     style="background-image: url('{{ url_for('static', filename=property.main_image) if property.main_image else url_for('static', filename='images/placeholder-property.jpg') }}');">
+                    <div class="property-price">{{ property.formatted_price }}</div>
+                    <div class="property-status status-{{ property.status }}">{{ property.status.title() }}</div>
+                    {% if property.virtual_tour_url %}
+                    <div class="virtual-tour-badge">
+                        <i class="fas fa-vr-cardboard"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="property-info">
+                    <h5 class="property-title">{{ property.title }}</h5>
+                    <p class="property-location">
+                        <i class="fas fa-map-marker-alt me-1"></i>
+                        {{ property.address }}, {{ property.city }}
+                    </p>
+                    
+                    <div class="property-features">
+                        {% if property.bedrooms %}
+                        <div class="feature-item">
+                            <i class="fas fa-bed"></i>
+                            <span>{{ property.bedrooms }} bed</span>
+                        </div>
+                        {% endif %}
+                        {% if property.bathrooms %}
+                        <div class="feature-item">
+                            <i class="fas fa-bath"></i>
+                            <span>{{ property.bathrooms }} bath</span>
+                        </div>
+                        {% endif %}
+                        {% if property.square_feet %}
+                        <div class="feature-item">
+                            <i class="fas fa-expand-arrows-alt"></i>
+                            <span>{{ "{:,}".format(property.square_feet) }} sqft</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    {% if property.description %}
+                    <p class="property-description text-muted">
+                        {{ property.description[:100] }}{% if property.description|length > 100 %}...{% endif %}
+                    </p>
+                    {% endif %}
+                    
+                    <div class="property-actions">
+                        <div class="row">
+                            <div class="col-6">
+                                <a href="{{ url_for('property.property_detail', property_id=property.id) }}" 
+                                   class="btn btn-primary w-100">
+                                    <i class="fas fa-eye me-1"></i>View Details
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="{{ url_for('booking.book_appointment', property_id=property.id) }}" 
+                                   class="btn btn-outline-primary w-100">
+                                    <i class="fas fa-calendar me-1"></i>Book Tour
+                                </a>
+                            </div>
+                        </div>
+                        {% if property.virtual_tour_url %}
+                        <div class="mt-2">
+                            <a href="{{ property.virtual_tour_url }}" target="_blank" 
+                               class="btn btn-success w-100">
+                                <i class="fas fa-vr-cardboard me-1"></i>Virtual Tour
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Realtor Info -->
+                    <div class="realtor-info mt-3 pt-3 border-top">
+                        <div class="d-flex align-items-center">
+                            <div class="realtor-avatar-small me-2">
+                                {% if property.realtor.profile_image %}
+                                    <img src="{{ url_for('static', filename=property.realtor.profile_image) }}" 
+                                         alt="{{ property.realtor.full_name }}" class="rounded-circle" width="30" height="30">
+                                {% else %}
+                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                         style="width: 30px; height: 30px; font-size: 0.8rem;">
+                                        {{ property.realtor.first_name[0] }}{{ property.realtor.last_name[0] }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold small">{{ property.realtor.full_name }}</div>
+                                {% if property.realtor.phone %}
+                                <small class="text-muted">{{ property.realtor.phone|phone }}</small>
+                                {% endif %}
+                            </div>
+                            <a href="tel:{{ property.realtor.phone }}" class="btn btn-sm btn-outline-success">
+                                <i class="fas fa-phone"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- No Results -->
+    {% if not properties.items %}
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No Properties Found</h4>
+                <p class="text-muted">Try adjusting your search criteria or browse all properties</p>
+                <a href="{{ url_for('property.properties') }}" class="btn btn-primary">
+                    <i class="fas fa-home me-2"></i>View All Properties
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Pagination -->
+    {% if properties.pages > 1 %}
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="Properties pagination">
+                <ul class="pagination justify-content-center">
+                    {% if properties.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('property.properties', page=properties.prev_num, **request.args) }}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for page_num in properties.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num != properties.page %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('property.properties', page=page_num, **request.args) }}">
+                                    {{ page_num }}
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                            {% endif %}
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if properties.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('property.properties', page=properties.next_num, **request.args) }}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.virtual-tour-badge {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+}
+
+.property-item.list-view .property-card {
+    display: flex;
+    flex-direction: row;
+}
+
+.property-item.list-view .property-image {
+    width: 300px;
+    flex-shrink: 0;
+}
+
+.property-item.list-view .property-info {
+    flex: 1;
+}
+</style>
+
+<script>
+// Set form values from URL parameters
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // Set form values
+    const form = document.getElementById('property-search-form');
+    const inputs = form.querySelectorAll('input, select');
+    
+    inputs.forEach(input => {
+        const value = urlParams.get(input.name);
+        if (value && value !== '') {
+            if (input.type === 'select-one') {
+                input.value = value;
+            } else {
+                input.value = value;
+            }
+        }
+    });
+});
+
+// View toggle functionality
+document.getElementById('list-view').addEventListener('change', function() {
+    if (this.checked) {
+        document.getElementById('properties-container').classList.add('list-view');
+        document.querySelectorAll('.property-item').forEach(item => {
+            item.classList.add('list-view');
+            item.classList.remove('col-lg-4', 'col-md-6');
+            item.classList.add('col-12');
+        });
+    }
+});
+
+document.getElementById('grid-view').addEventListener('change', function() {
+    if (this.checked) {
+        document.getElementById('properties-container').classList.remove('list-view');
+        document.querySelectorAll('.property-item').forEach(item => {
+            item.classList.remove('list-view', 'col-12');
+            item.classList.add('col-lg-4', 'col-md-6');
+        });
+    }
+});
+</script>
+{% endblock %}

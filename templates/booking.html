@@ -1,0 +1,332 @@
+{% extends "base.html" %}
+
+{% block title %}Book Appointment - Hawaii Elite Realty{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="form-container">
+                <div class="text-center mb-4">
+                    <h2 class="text-primary-blue">
+                        <i class="fas fa-calendar-plus me-2"></i>Schedule Property Viewing
+                    </h2>
+                    <p class="text-muted">Book an appointment to visit this beautiful property</p>
+                </div>
+
+                <!-- Property Summary -->
+                <div class="property-summary mb-4">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="property-image-booking">
+                                {% if property.main_image %}
+                                    <img src="{{ url_for('static', filename=property.main_image) }}" 
+                                         alt="{{ property.title }}" class="w-100 h-100 object-fit-cover">
+                                {% else %}
+                                    <div class="placeholder-image">
+                                        <i class="fas fa-home fa-3x text-muted"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <h4 class="text-primary-blue">{{ property.title }}</h4>
+                            <p class="text-muted mb-2">
+                                <i class="fas fa-map-marker-alt me-1"></i>
+                                {{ property.address }}, {{ property.city }}
+                            </p>
+                            <p class="text-success fw-bold fs-5">{{ property.formatted_price }}</p>
+                            
+                            {% if property.bedrooms or property.bathrooms %}
+                            <div class="property-features-booking">
+                                {% if property.bedrooms %}
+                                <span class="me-3"><i class="fas fa-bed me-1"></i>{{ property.bedrooms }} bed</span>
+                                {% endif %}
+                                {% if property.bathrooms %}
+                                <span class="me-3"><i class="fas fa-bath me-1"></i>{{ property.bathrooms }} bath</span>
+                                {% endif %}
+                                {% if property.square_feet %}
+                                <span><i class="fas fa-expand-arrows-alt me-1"></i>{{ "{:,}".format(property.square_feet) }} sqft</span>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Booking Form -->
+                <form method="POST" class="needs-validation" novalidate>
+                    {{ form.hidden_tag() }}
+                    
+                    <!-- Appointment Details -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-calendar me-2"></i>Appointment Details
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form.appointment_date.label(class="form-label") }}
+                                    {{ form.appointment_date(class="form-control" + (" is-invalid" if form.appointment_date.errors else "")) }}
+                                    {% if form.appointment_date.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.appointment_date.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">Select your preferred date and time</small>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    {{ form.duration.label(class="form-label") }}
+                                    {{ form.duration(class="form-control" + (" is-invalid" if form.duration.errors else "")) }}
+                                    {% if form.duration.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.duration.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form.appointment_type.label(class="form-label") }}
+                                {{ form.appointment_type(class="form-select" + (" is-invalid" if form.appointment_type.errors else "")) }}
+                                {% if form.appointment_type.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.appointment_type.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Information -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-user me-2"></i>Your Information
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                {{ form.client_name.label(class="form-label") }}
+                                {{ form.client_name(class="form-control" + (" is-invalid" if form.client_name.errors else "")) }}
+                                {% if form.client_name.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.client_name.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form.client_email.label(class="form-label") }}
+                                    {{ form.client_email(class="form-control" + (" is-invalid" if form.client_email.errors else "")) }}
+                                    {% if form.client_email.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.client_email.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    {{ form.client_phone.label(class="form-label") }}
+                                    {{ form.client_phone(class="form-control" + (" is-invalid" if form.client_phone.errors else "")) }}
+                                    {% if form.client_phone.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.client_phone.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form.notes.label(class="form-label") }}
+                                {{ form.notes(class="form-control" + (" is-invalid" if form.notes.errors else ""), rows="3", placeholder="Any special requests or questions...") }}
+                                {% if form.notes.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.notes.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Realtor Information -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-user-tie me-2"></i>Your Realtor
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-3 text-center">
+                                    <div class="realtor-avatar-booking">
+                                        {% if property.realtor.profile_image %}
+                                            <img src="{{ url_for('static', filename=property.realtor.profile_image) }}" 
+                                                 alt="{{ property.realtor.full_name }}" class="w-100 h-100 object-fit-cover">
+                                        {% else %}
+                                            <div class="avatar-placeholder">
+                                                {{ property.realtor.first_name[0] }}{{ property.realtor.last_name[0] }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <h5 class="text-primary-blue">{{ property.realtor.full_name }}</h5>
+                                    <p class="text-muted">Licensed Real Estate Professional</p>
+                                    {% if property.realtor.phone %}
+                                    <p class="mb-2">
+                                        <i class="fas fa-phone me-2"></i>{{ property.realtor.phone|phone }}
+                                    </p>
+                                    {% endif %}
+                                    <p class="mb-0">
+                                        <i class="fas fa-envelope me-2"></i>{{ property.realtor.email }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Available Time Slots -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-clock me-2"></i>Available Time Slots
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="time-slots-info">
+                                <h6 class="text-primary">Business Hours:</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check text-success me-2"></i>Monday - Friday: 9:00 AM - 6:00 PM</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Saturday: 9:00 AM - 6:00 PM</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Sunday: 12:00 PM - 5:00 PM</li>
+                                </ul>
+                                
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Note:</strong> Appointments are subject to realtor availability. You will receive a confirmation email within 24 hours.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-success btn-lg px-5">
+                            <i class="fas fa-calendar-check me-2"></i>Book Appointment
+                        </button>
+                        <a href="{{ url_for('property.property_detail', property_id=property.id) }}" 
+                           class="btn btn-outline-secondary btn-lg px-5 ms-3">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Property
+                        </a>
+                    </div>
+                    
+                    <!-- Terms -->
+                    <div class="mt-4 text-center">
+                        <small class="text-muted">
+                            By booking this appointment, you agree to our 
+                            <a href="#" class="text-primary">Terms of Service</a> and 
+                            <a href="#" class="text-primary">Privacy Policy</a>.
+                        </small>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.property-summary {
+    background: var(--light-gray);
+    border-radius: 15px;
+    padding: 1.5rem;
+}
+
+.property-image-booking {
+    height: 120px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.placeholder-image {
+    height: 100%;
+    background: var(--light-gray);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+}
+
+.property-features-booking {
+    color: var(--medium-gray);
+    font-size: 0.9rem;
+}
+
+.realtor-avatar-booking {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin: 0 auto;
+    border: 3px solid var(--primary-blue);
+}
+
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--primary-blue), var(--tropical-green));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.time-slots-info {
+    background: rgba(var(--primary-blue), 0.05);
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.card-header {
+    background: linear-gradient(135deg, var(--primary-blue), var(--ocean-blue));
+    color: white;
+}
+</style>
+
+<script>
+// Set minimum date to tomorrow
+document.addEventListener('DOMContentLoaded', function() {
+    const dateInput = document.getElementById('appointment_date');
+    if (dateInput) {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        dateInput.min = tomorrow.toISOString().slice(0, 16);
+    }
+});
+
+// Auto-fill client info if logged in
+{% if current_user.is_authenticated %}
+document.addEventListener('DOMContentLoaded', function() {
+    const nameInput = document.getElementById('client_name');
+    const emailInput = document.getElementById('client_email');
+    const phoneInput = document.getElementById('client_phone');
+    
+    if (nameInput && !nameInput.value) {
+        nameInput.value = '{{ current_user.full_name }}';
+    }
+    if (emailInput && !emailInput.value) {
+        emailInput.value = '{{ current_user.email }}';
+    }
+    if (phoneInput && !phoneInput.value && '{{ current_user.phone }}') {
+        phoneInput.value = '{{ current_user.phone }}';
+    }
+});
+{% endif %}
+</script>
+{% endblock %}

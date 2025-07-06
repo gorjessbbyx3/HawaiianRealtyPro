@@ -1,0 +1,453 @@
+{% extends "base.html" %}
+
+{% block title %}Leads - Hawaii Elite Realty{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="text-primary-blue">
+                    <i class="fas fa-users me-2"></i>Lead Management
+                </h1>
+                <div class="text-muted">
+                    Manage and track your potential clients
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lead Statistics -->
+    <div class="row mb-4">
+        {% set new_leads = leads|selectattr('status', 'equalto', 'new')|list %}
+        {% set contacted_leads = leads|selectattr('status', 'equalto', 'contacted')|list %}
+        {% set qualified_leads = leads|selectattr('status', 'equalto', 'qualified')|list %}
+        {% set converted_leads = leads|selectattr('status', 'equalto', 'converted')|list %}
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, var(--tropical-green), #009966);">
+                <div class="stat-value">{{ new_leads|length }}</div>
+                <div class="stat-title">New Leads</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, var(--primary-blue), var(--ocean-blue));">
+                <div class="stat-value">{{ contacted_leads|length }}</div>
+                <div class="stat-title">Contacted</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, var(--sunset-orange), #e67a37);">
+                <div class="stat-value">{{ qualified_leads|length }}</div>
+                <div class="stat-title">Qualified</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, var(--dark-blue), #002d5f);">
+                <div class="stat-value">{{ converted_leads|length }}</div>
+                <div class="stat-title">Converted</div>
+            </div>
+        </div>
+    </div>
+
+    {% if leads %}
+    <!-- Lead Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="btn-group" role="group" aria-label="Lead filters">
+                                <input type="radio" class="btn-check" name="lead-filter" id="filter-all" checked>
+                                <label class="btn btn-outline-primary" for="filter-all">All ({{ leads|length }})</label>
+                                
+                                <input type="radio" class="btn-check" name="lead-filter" id="filter-new">
+                                <label class="btn btn-outline-success" for="filter-new">New ({{ new_leads|length }})</label>
+                                
+                                <input type="radio" class="btn-check" name="lead-filter" id="filter-contacted">
+                                <label class="btn btn-outline-primary" for="filter-contacted">Contacted ({{ contacted_leads|length }})</label>
+                                
+                                <input type="radio" class="btn-check" name="lead-filter" id="filter-qualified">
+                                <label class="btn btn-outline-warning" for="filter-qualified">Qualified ({{ qualified_leads|length }})</label>
+                                
+                                <input type="radio" class="btn-check" name="lead-filter" id="filter-converted">
+                                <label class="btn btn-outline-dark" for="filter-converted">Converted ({{ converted_leads|length }})</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Search leads..." id="lead-search">
+                                <button class="btn btn-outline-secondary" type="button">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leads List -->
+    <div class="row">
+        {% for lead in leads|sort(attribute='created_at', reverse=true) %}
+        <div class="col-lg-6 mb-4 lead-item" data-status="{{ lead.status }}" data-priority="{{ lead.priority }}">
+            <div class="lead-card">
+                <div class="lead-header">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="lead-info">
+                            <h5 class="mb-1">{{ lead.name }}</h5>
+                            <p class="mb-0 opacity-75">
+                                <i class="fas fa-envelope me-1"></i>{{ lead.email }}
+                            </p>
+                            {% if lead.phone %}
+                            <p class="mb-0 opacity-75">
+                                <i class="fas fa-phone me-1"></i>{{ lead.phone|phone }}
+                            </p>
+                            {% endif %}
+                        </div>
+                        <div class="lead-priority">
+                            <span class="badge bg-{{ 'danger' if lead.priority == 'high' else 'warning' if lead.priority == 'medium' else 'secondary' }}">
+                                {{ lead.priority.title() }} Priority
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="lead-body">
+                    <div class="lead-details mb-3">
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <strong>Source:</strong>
+                                <span class="text-muted">{{ lead.source.title() }}</span>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong>Created:</strong>
+                                <span class="text-muted">{{ lead.created_at.strftime('%b %d, %Y') }}</span>
+                            </div>
+                            {% if lead.budget_range %}
+                            <div class="col-md-6 mb-2">
+                                <strong>Budget:</strong>
+                                <span class="text-muted">
+                                    {% if lead.budget_range == 'under_500k' %}Under $500K
+                                    {% elif lead.budget_range == '500k_1m' %}$500K - $1M
+                                    {% elif lead.budget_range == '1m_2m' %}$1M - $2M
+                                    {% elif lead.budget_range == '2m_5m' %}$2M - $5M
+                                    {% elif lead.budget_range == 'over_5m' %}Over $5M
+                                    {% else %}{{ lead.budget_range }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                            {% endif %}
+                            {% if lead.last_contact %}
+                            <div class="col-md-6 mb-2">
+                                <strong>Last Contact:</strong>
+                                <span class="text-muted">{{ lead.last_contact.strftime('%b %d, %Y') }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if lead.property %}
+                    <div class="lead-property mb-3">
+                        <h6 class="text-primary">Interested Property:</h6>
+                        <div class="property-summary d-flex align-items-center">
+                            <div class="property-thumbnail me-3">
+                                {% if lead.property.main_image %}
+                                    <img src="{{ url_for('static', filename=lead.property.main_image) }}" 
+                                         class="rounded" width="60" height="60" style="object-fit: cover;">
+                                {% else %}
+                                    <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                         style="width: 60px; height: 60px;">
+                                        <i class="fas fa-home text-muted"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <div class="fw-bold">
+                                    <a href="{{ url_for('property.property_detail', property_id=lead.property.id) }}" 
+                                       class="text-decoration-none">
+                                        {{ lead.property.title }}
+                                    </a>
+                                </div>
+                                <small class="text-muted">{{ lead.property.city }} - {{ lead.property.formatted_price }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if lead.message %}
+                    <div class="lead-message mb-3">
+                        <h6 class="text-dark">Message:</h6>
+                        <p class="text-muted small bg-light p-2 rounded">{{ lead.message }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if lead.preferred_areas %}
+                    <div class="lead-preferences mb-3">
+                        <h6 class="text-dark">Preferred Areas:</h6>
+                        <p class="text-muted small">{{ lead.preferred_areas }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Status Management -->
+                    <div class="lead-status-section">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="mb-0">Status:</h6>
+                            <span class="lead-status status-{{ lead.status }}">{{ lead.status.title() }}</span>
+                        </div>
+                        
+                        <div class="status-actions">
+                            <div class="btn-group w-100 mb-2" role="group">
+                                <a href="{{ url_for('crm.update_lead_status', lead_id=lead.id, status='new') }}" 
+                                   class="btn btn-sm btn-outline-success {{ 'active' if lead.status == 'new' else '' }}">
+                                    New
+                                </a>
+                                <a href="{{ url_for('crm.update_lead_status', lead_id=lead.id, status='contacted') }}" 
+                                   class="btn btn-sm btn-outline-primary {{ 'active' if lead.status == 'contacted' else '' }}">
+                                    Contacted
+                                </a>
+                                <a href="{{ url_for('crm.update_lead_status', lead_id=lead.id, status='qualified') }}" 
+                                   class="btn btn-sm btn-outline-warning {{ 'active' if lead.status == 'qualified' else '' }}">
+                                    Qualified
+                                </a>
+                                <a href="{{ url_for('crm.update_lead_status', lead_id=lead.id, status='converted') }}" 
+                                   class="btn btn-sm btn-outline-dark {{ 'active' if lead.status == 'converted' else '' }}">
+                                    Converted
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Actions -->
+                    <div class="lead-actions">
+                        <div class="row g-2">
+                            <div class="col-4">
+                                <a href="tel:{{ lead.phone }}" class="btn btn-success btn-sm w-100" 
+                                   {% if not lead.phone %}disabled{% endif %}>
+                                    <i class="fas fa-phone"></i>
+                                </a>
+                            </div>
+                            <div class="col-4">
+                                <a href="mailto:{{ lead.email }}" class="btn btn-primary btn-sm w-100">
+                                    <i class="fas fa-envelope"></i>
+                                </a>
+                            </div>
+                            <div class="col-4">
+                                <button type="button" class="btn btn-info btn-sm w-100" 
+                                        data-bs-toggle="modal" data-bs-target="#noteModal{{ lead.id }}">
+                                    <i class="fas fa-sticky-note"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Note Modal -->
+        <div class="modal fade" id="noteModal{{ lead.id }}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add Note for {{ lead.name }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="mb-3">
+                                <label class="form-label">Note</label>
+                                <textarea class="form-control" rows="4" 
+                                          placeholder="Add follow-up notes, meeting details, etc."></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Next Follow-up</label>
+                                <input type="datetime-local" class="form-control">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary">Save Note</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- No Leads -->
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-user-friends fa-4x text-muted mb-4"></i>
+                <h4 class="text-muted">No Leads Yet</h4>
+                <p class="text-muted mb-4">
+                    Leads will appear here when potential clients inquire about your properties. 
+                    Make sure your property listings are active and visible to generate leads.
+                </p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{{ url_for('property.add_property') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Add Property
+                    </a>
+                    <a href="{{ url_for('property.properties') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-eye me-2"></i>View My Listings
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.lead-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.lead-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.lead-header {
+    background: linear-gradient(135deg, var(--primary-blue), var(--ocean-blue));
+    color: white;
+    padding: 1.25rem;
+}
+
+.lead-body {
+    padding: 1.25rem;
+}
+
+.lead-details {
+    background: var(--light-gray);
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.lead-property {
+    background: rgba(var(--tropical-green), 0.1);
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.lead-message {
+    background: rgba(var(--sunset-orange), 0.1);
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.lead-preferences {
+    background: rgba(var(--primary-blue), 0.1);
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.lead-status {
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.status-new {
+    background-color: var(--tropical-green);
+    color: white;
+}
+
+.status-contacted {
+    background-color: var(--primary-blue);
+    color: white;
+}
+
+.status-qualified {
+    background-color: var(--sunset-orange);
+    color: white;
+}
+
+.status-converted {
+    background-color: var(--dark-blue);
+    color: white;
+}
+
+.status-lost {
+    background-color: var(--medium-gray);
+    color: white;
+}
+
+.status-actions .btn.active {
+    background-color: var(--primary-blue);
+    color: white;
+    border-color: var(--primary-blue);
+}
+
+.property-summary {
+    background: white;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.lead-actions {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #dee2e6;
+}
+
+.lead-item {
+    transition: all 0.3s ease;
+}
+
+.lead-item.hidden {
+    display: none;
+}
+</style>
+
+<script>
+// Lead filtering
+document.addEventListener('DOMContentLoaded', function() {
+    const filterButtons = document.querySelectorAll('input[name="lead-filter"]');
+    const leadItems = document.querySelectorAll('.lead-item');
+    const searchInput = document.getElementById('lead-search');
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('change', function() {
+            const filterValue = this.id.replace('filter-', '');
+            
+            leadItems.forEach(item => {
+                const status = item.dataset.status;
+                if (filterValue === 'all' || status === filterValue) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
+    
+    // Search functionality
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            
+            leadItems.forEach(item => {
+                const leadText = item.textContent.toLowerCase();
+                if (leadText.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

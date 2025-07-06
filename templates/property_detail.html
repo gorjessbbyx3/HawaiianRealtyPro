@@ -1,0 +1,432 @@
+{% extends "base.html" %}
+
+{% block title %}{{ property.title }} - Hawaii Elite Realty{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-4">
+    <!-- Property Header -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('property.properties') }}">Properties</a></li>
+                    <li class="breadcrumb-item active">{{ property.title }}</li>
+                </ol>
+            </nav>
+            
+            <h1 class="text-primary-blue">{{ property.title }}</h1>
+            <p class="lead text-muted">
+                <i class="fas fa-map-marker-alt me-2"></i>
+                {{ property.address }}, {{ property.city }}, {{ property.state }} {{ property.zip_code }}
+            </p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+            <div class="property-price-large mb-2">{{ property.formatted_price }}</div>
+            <span class="badge bg-{{ 'success' if property.status == 'active' else 'warning' if property.status == 'pending' else 'secondary' }} fs-6">
+                {{ property.status.title() }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Property Gallery -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="property-gallery">
+                {% if property.images %}
+                    <img id="main-image" 
+                         src="{{ url_for('static', filename=property.images[0].image_url) }}" 
+                         alt="{{ property.title }}" 
+                         class="gallery-main-image">
+                    
+                    {% if property.images|length > 1 %}
+                    <div class="gallery-thumbnails">
+                        {% for image in property.images %}
+                        <img src="{{ url_for('static', filename=image.image_url) }}" 
+                             alt="{{ image.caption or property.title }}" 
+                             class="gallery-thumbnail">
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <div class="placeholder-gallery">
+                        <i class="fas fa-image fa-3x text-muted"></i>
+                        <p class="text-muted mt-2">No images available</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Property Details -->
+        <div class="col-lg-8">
+            <!-- Property Features -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Property Details
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% if property.bedrooms %}
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="feature-box text-center">
+                                <i class="fas fa-bed fa-2x text-primary mb-2"></i>
+                                <div class="fw-bold">{{ property.bedrooms }}</div>
+                                <small class="text-muted">Bedrooms</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if property.bathrooms %}
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="feature-box text-center">
+                                <i class="fas fa-bath fa-2x text-primary mb-2"></i>
+                                <div class="fw-bold">{{ property.bathrooms }}</div>
+                                <small class="text-muted">Bathrooms</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if property.square_feet %}
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="feature-box text-center">
+                                <i class="fas fa-expand-arrows-alt fa-2x text-primary mb-2"></i>
+                                <div class="fw-bold">{{ "{:,}".format(property.square_feet) }}</div>
+                                <small class="text-muted">Sq Ft</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if property.lot_size %}
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="feature-box text-center">
+                                <i class="fas fa-tree fa-2x text-primary mb-2"></i>
+                                <div class="fw-bold">{{ property.lot_size }} ac</div>
+                                <small class="text-muted">Lot Size</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if property.year_built %}
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="feature-box text-center">
+                                <i class="fas fa-calendar fa-2x text-primary mb-2"></i>
+                                <div class="fw-bold">{{ property.year_built }}</div>
+                                <small class="text-muted">Year Built</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="feature-box text-center">
+                                <i class="fas fa-home fa-2x text-primary mb-2"></i>
+                                <div class="fw-bold">{{ property.property_type.title() }}</div>
+                                <small class="text-muted">Property Type</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            {% if property.description %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-align-left me-2"></i>Description
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ property.description|nl2br }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Features & Amenities -->
+            {% if property.features %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-star me-2"></i>Features & Amenities
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for feature in property.features.split('\n') if feature.strip() %}
+                        <div class="col-md-6 mb-2">
+                            <i class="fas fa-check text-success me-2"></i>{{ feature.strip() }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Virtual Tour -->
+            {% if property.virtual_tour_url %}
+            <div class="virtual-tour-container mb-4">
+                <div class="virtual-tour-icon">
+                    <i class="fas fa-vr-cardboard"></i>
+                </div>
+                <h4 class="mb-3">Take a Virtual Tour</h4>
+                <p class="text-muted mb-3">Experience this property from the comfort of your home</p>
+                <a href="{{ property.virtual_tour_url }}" target="_blank" class="btn btn-primary btn-lg">
+                    <i class="fas fa-play me-2"></i>Start Virtual Tour
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Video Tour -->
+            {% if property.video_url %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-video me-2"></i>Video Tour
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="ratio ratio-16x9">
+                        <iframe src="{{ property.video_url }}" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Contact Form -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-envelope me-2"></i>Get More Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('property.property_inquiry', property_id=property.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" name="name" class="form-control" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" name="phone" class="form-control">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Message</label>
+                            <textarea name="message" class="form-control" rows="4" 
+                                      placeholder="I'm interested in this property..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Budget Range</label>
+                            <select name="budget_range" class="form-select">
+                                <option value="">Select Budget Range</option>
+                                <option value="under_500k">Under $500,000</option>
+                                <option value="500k_1m">$500,000 - $1,000,000</option>
+                                <option value="1m_2m">$1,000,000 - $2,000,000</option>
+                                <option value="2m_5m">$2,000,000 - $5,000,000</option>
+                                <option value="over_5m">Over $5,000,000</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-paper-plane me-2"></i>Send Inquiry
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Realtor Info -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user me-2"></i>Your Realtor
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="realtor-avatar mb-3">
+                        {% if property.realtor.profile_image %}
+                            <img src="{{ url_for('static', filename=property.realtor.profile_image) }}" 
+                                 alt="{{ property.realtor.full_name }}" class="w-100 h-100 object-fit-cover">
+                        {% else %}
+                            {{ property.realtor.first_name[0] }}{{ property.realtor.last_name[0] }}
+                        {% endif %}
+                    </div>
+                    
+                    <h5 class="realtor-name">{{ property.realtor.full_name }}</h5>
+                    <p class="text-muted">Licensed Real Estate Professional</p>
+                    
+                    {% if property.realtor.bio %}
+                    <p class="text-muted small">{{ property.realtor.bio[:150] }}{% if property.realtor.bio|length > 150 %}...{% endif %}</p>
+                    {% endif %}
+                    
+                    <div class="contact-buttons">
+                        {% if property.realtor.phone %}
+                        <a href="tel:{{ property.realtor.phone }}" class="btn btn-success w-100 mb-2">
+                            <i class="fas fa-phone me-2"></i>{{ property.realtor.phone|phone }}
+                        </a>
+                        {% endif %}
+                        
+                        <a href="mailto:{{ property.realtor.email }}" class="btn btn-outline-primary w-100 mb-2">
+                            <i class="fas fa-envelope me-2"></i>Send Email
+                        </a>
+                        
+                        <a href="{{ url_for('realtor.realtor_profile', realtor_id=property.realtor.id) }}" 
+                           class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-user me-2"></i>View Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schedule Viewing -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar me-2"></i>Schedule a Viewing
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <p class="text-muted mb-3">Book a private showing with our realtor</p>
+                    <a href="{{ url_for('booking.book_appointment', property_id=property.id) }}" 
+                       class="btn btn-success btn-lg w-100">
+                        <i class="fas fa-calendar-plus me-2"></i>Book Now
+                    </a>
+                </div>
+            </div>
+
+            <!-- Property Stats -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Property Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <div class="stat-number text-primary">{{ property.id }}</div>
+                            <div class="stat-label">Property ID</div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="stat-number text-primary">{{ property.created_at.strftime('%Y') }}</div>
+                            <div class="stat-label">Listed</div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-top pt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>
+                            Last updated: {{ property.updated_at.strftime('%B %d, %Y') }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Properties -->
+    {% if related_properties %}
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 class="text-primary-blue mb-4">
+                <i class="fas fa-home me-2"></i>Similar Properties in {{ property.city }}
+            </h3>
+        </div>
+    </div>
+    
+    <div class="row">
+        {% for related_property in related_properties %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="property-card">
+                <div class="property-image" 
+                     style="background-image: url('{{ url_for('static', filename=related_property.main_image) if related_property.main_image else url_for('static', filename='images/placeholder-property.jpg') }}');">
+                    <div class="property-price">{{ related_property.formatted_price }}</div>
+                    <div class="property-status status-{{ related_property.status }}">{{ related_property.status.title() }}</div>
+                </div>
+                
+                <div class="property-info">
+                    <h5 class="property-title">{{ related_property.title }}</h5>
+                    <p class="property-location">
+                        <i class="fas fa-map-marker-alt me-1"></i>
+                        {{ related_property.address }}, {{ related_property.city }}
+                    </p>
+                    
+                    <div class="property-features">
+                        {% if related_property.bedrooms %}
+                        <div class="feature-item">
+                            <i class="fas fa-bed"></i>
+                            <span>{{ related_property.bedrooms }} bed</span>
+                        </div>
+                        {% endif %}
+                        {% if related_property.bathrooms %}
+                        <div class="feature-item">
+                            <i class="fas fa-bath"></i>
+                            <span>{{ related_property.bathrooms }} bath</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <a href="{{ url_for('property.property_detail', property_id=related_property.id) }}" 
+                       class="btn btn-outline-primary w-100">
+                        <i class="fas fa-eye me-1"></i>View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.property-price-large {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--primary-blue);
+}
+
+.feature-box {
+    padding: 1rem;
+    border: 2px solid var(--light-gray);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.feature-box:hover {
+    border-color: var(--primary-blue);
+    background: var(--light-gray);
+}
+
+.placeholder-gallery {
+    height: 400px;
+    background: var(--light-gray);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+}
+
+.contact-buttons .btn {
+    transition: all 0.3s ease;
+}
+
+.contact-buttons .btn:hover {
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}

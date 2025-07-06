@@ -1,0 +1,603 @@
+/* Hawaii Real Estate Platform - Custom Styles */
+
+:root {
+    --primary-blue: #0077be;
+    --ocean-blue: #006ba6;
+    --tropical-green: #00a86b;
+    --sunset-orange: #ff8c42;
+    --sand-beige: #f5f5dc;
+    --coral-pink: #ff7f7f;
+    --dark-blue: #003f7f;
+    --light-gray: #f8f9fa;
+    --medium-gray: #6c757d;
+    --dark-gray: #343a40;
+}
+
+/* Global Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: var(--dark-gray);
+}
+
+.btn-primary {
+    background-color: var(--primary-blue);
+    border-color: var(--primary-blue);
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: var(--ocean-blue);
+    border-color: var(--ocean-blue);
+    transform: translateY(-2px);
+}
+
+.btn-success {
+    background-color: var(--tropical-green);
+    border-color: var(--tropical-green);
+}
+
+.btn-warning {
+    background-color: var(--sunset-orange);
+    border-color: var(--sunset-orange);
+}
+
+/* Header */
+.navbar {
+    background: linear-gradient(135deg, var(--primary-blue), var(--ocean-blue));
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: white !important;
+}
+
+.navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    transition: color 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    color: white !important;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(rgba(0, 119, 190, 0.8), rgba(0, 107, 166, 0.8)),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><path d="M0,400 Q300,350 600,380 T1200,360 L1200,600 L0,600 Z" fill="%23006ba6"/><path d="M0,450 Q400,420 800,440 T1200,420 L1200,600 L0,600 Z" fill="%230077be" opacity="0.7"/></svg>');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    padding: 100px 0;
+    text-align: center;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hero-subtitle {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+}
+
+/* Property Cards */
+.property-card {
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.property-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.property-image {
+    height: 250px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.property-price {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: linear-gradient(135deg, var(--sunset-orange), var(--coral-pink));
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.property-status {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.status-active {
+    background-color: var(--tropical-green);
+    color: white;
+}
+
+.status-pending {
+    background-color: var(--sunset-orange);
+    color: white;
+}
+
+.status-sold {
+    background-color: var(--medium-gray);
+    color: white;
+}
+
+.property-info {
+    padding: 1.5rem;
+}
+
+.property-title {
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: var(--dark-blue);
+}
+
+.property-location {
+    color: var(--medium-gray);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.property-features {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: var(--medium-gray);
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Realtor Cards */
+.realtor-card {
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    text-align: center;
+    padding: 2rem;
+}
+
+.realtor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.realtor-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-blue), var(--tropical-green));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 3rem;
+    color: white;
+    font-weight: bold;
+}
+
+.realtor-name {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: var(--dark-blue);
+    margin-bottom: 0.5rem;
+}
+
+.realtor-title {
+    color: var(--medium-gray);
+    margin-bottom: 1rem;
+}
+
+.realtor-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--light-gray);
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary-blue);
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--medium-gray);
+}
+
+/* Dashboard */
+.dashboard-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.stat-card {
+    background: linear-gradient(135deg, var(--primary-blue), var(--ocean-blue));
+    color: white;
+    text-align: center;
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 1rem;
+}
+
+.stat-value {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.stat-title {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+/* Forms */
+.form-container {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    margin: 2rem 0;
+}
+
+.form-control {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    padding: 12px 15px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 0.2rem rgba(0, 119, 190, 0.25);
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--dark-blue);
+    margin-bottom: 0.5rem;
+}
+
+/* Search Filters */
+.search-filters {
+    background: var(--light-gray);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.filter-row {
+    margin-bottom: 1rem;
+}
+
+.filter-row:last-child {
+    margin-bottom: 0;
+}
+
+/* Property Gallery */
+.property-gallery {
+    position: relative;
+    height: 400px;
+    border-radius: 15px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.gallery-main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.gallery-thumbnails {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    overflow-x: auto;
+    padding: 10px 0;
+}
+
+.gallery-thumbnail {
+    width: 80px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.gallery-thumbnail:hover,
+.gallery-thumbnail.active {
+    border-color: var(--primary-blue);
+    transform: scale(1.05);
+}
+
+/* Virtual Tour */
+.virtual-tour-container {
+    background: var(--light-gray);
+    border-radius: 15px;
+    padding: 2rem;
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.virtual-tour-icon {
+    font-size: 4rem;
+    color: var(--primary-blue);
+    margin-bottom: 1rem;
+}
+
+/* Appointment Calendar */
+.appointment-calendar {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--light-gray);
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: var(--light-gray);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.calendar-day {
+    background: white;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.calendar-day:hover {
+    background: var(--primary-blue);
+    color: white;
+}
+
+.calendar-day.available {
+    background: var(--tropical-green);
+    color: white;
+}
+
+.calendar-day.booked {
+    background: var(--sunset-orange);
+    color: white;
+}
+
+/* Lead Management */
+.lead-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.lead-header {
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, var(--primary-blue), var(--ocean-blue));
+    color: white;
+}
+
+.lead-body {
+    padding: 1.5rem;
+}
+
+.lead-status {
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.status-new {
+    background-color: var(--tropical-green);
+    color: white;
+}
+
+.status-contacted {
+    background-color: var(--primary-blue);
+    color: white;
+}
+
+.status-qualified {
+    background-color: var(--sunset-orange);
+    color: white;
+}
+
+.status-converted {
+    background-color: var(--dark-blue);
+    color: white;
+}
+
+.status-lost {
+    background-color: var(--medium-gray);
+    color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .property-features {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .search-filters {
+        padding: 1rem;
+    }
+    
+    .stat-card {
+        padding: 1.5rem;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+    }
+    
+    .realtor-stats {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s ease;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+/* Utility Classes */
+.text-primary-blue {
+    color: var(--primary-blue) !important;
+}
+
+.text-ocean-blue {
+    color: var(--ocean-blue) !important;
+}
+
+.text-tropical-green {
+    color: var(--tropical-green) !important;
+}
+
+.bg-light-gray {
+    background-color: var(--light-gray) !important;
+}
+
+.border-radius-15 {
+    border-radius: 15px !important;
+}
+
+.shadow-custom {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Footer */
+.footer {
+    background: linear-gradient(135deg, var(--dark-blue), var(--primary-blue));
+    color: white;
+    padding: 3rem 0 1rem;
+    margin-top: 4rem;
+}
+
+.footer-section h5 {
+    color: white;
+    margin-bottom: 1rem;
+    font-weight: bold;
+}
+
+.footer-section a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-section a:hover {
+    color: white;
+}
+
+.footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    padding-top: 1rem;
+    margin-top: 2rem;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+}

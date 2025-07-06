@@ -1,0 +1,338 @@
+{% extends "base.html" %}
+
+{% block title %}Appointments - Hawaii Elite Realty{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="text-primary-blue">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    {% if current_user.role == 'realtor' %}My Appointments{% else %}Your Appointments{% endif %}
+                </h1>
+                {% if current_user.role == 'realtor' %}
+                <div class="text-muted">
+                    Manage your property showings and consultations
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if appointments %}
+    <!-- Appointments List -->
+    <div class="row">
+        <div class="col-12">
+            {% set upcoming_appointments = appointments|selectattr('appointment_date', 'ge', moment().replace(hour=0, minute=0, second=0, microsecond=0))|list %}
+            {% set past_appointments = appointments|rejectattr('appointment_date', 'ge', moment().replace(hour=0, minute=0, second=0, microsecond=0))|list %}
+            
+            <!-- Upcoming Appointments -->
+            {% if upcoming_appointments %}
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-plus me-2"></i>Upcoming Appointments ({{ upcoming_appointments|length }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for appointment in upcoming_appointments %}
+                        <div class="col-lg-6 mb-4">
+                            <div class="appointment-card border rounded p-3">
+                                <div class="appointment-header d-flex justify-content-between align-items-start mb-3">
+                                    <div class="appointment-date">
+                                        <div class="date-number text-primary fw-bold fs-4">
+                                            {{ appointment.appointment_date.strftime('%d') }}
+                                        </div>
+                                        <div class="date-month text-muted">
+                                            {{ appointment.appointment_date.strftime('%b %Y') }}
+                                        </div>
+                                    </div>
+                                    <div class="appointment-time text-end">
+                                        <div class="time-display fw-bold">
+                                            {{ appointment.appointment_date.strftime('%I:%M %p') }}
+                                        </div>
+                                        <div class="duration text-muted">
+                                            {{ appointment.duration }} minutes
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="appointment-details">
+                                    <h6 class="property-title text-primary-blue">
+                                        <i class="fas fa-home me-1"></i>
+                                        <a href="{{ url_for('property.property_detail', property_id=appointment.property.id) }}" 
+                                           class="text-decoration-none">
+                                            {{ appointment.property.title }}
+                                        </a>
+                                    </h6>
+                                    
+                                    <p class="property-address text-muted mb-2">
+                                        <i class="fas fa-map-marker-alt me-1"></i>
+                                        {{ appointment.property.address }}, {{ appointment.property.city }}
+                                    </p>
+                                    
+                                    <div class="appointment-type mb-2">
+                                        <span class="badge bg-primary">{{ appointment.appointment_type.title() }}</span>
+                                        <span class="badge bg-{{ 'success' if appointment.status == 'scheduled' else 'warning' if appointment.status == 'confirmed' else 'secondary' }}">
+                                            {{ appointment.status.title() }}
+                                        </span>
+                                    </div>
+                                    
+                                    {% if current_user.role == 'realtor' %}
+                                    <!-- Realtor View -->
+                                    <div class="client-info">
+                                        <h6 class="text-dark">Client Information:</h6>
+                                        <p class="mb-1">
+                                            <i class="fas fa-user me-1"></i>
+                                            {{ appointment.client_name or (appointment.client.full_name if appointment.client else 'N/A') }}
+                                        </p>
+                                        {% if appointment.client_email %}
+                                        <p class="mb-1">
+                                            <i class="fas fa-envelope me-1"></i>
+                                            <a href="mailto:{{ appointment.client_email }}">{{ appointment.client_email }}</a>
+                                        </p>
+                                        {% endif %}
+                                        {% if appointment.client_phone %}
+                                        <p class="mb-1">
+                                            <i class="fas fa-phone me-1"></i>
+                                            <a href="tel:{{ appointment.client_phone }}">{{ appointment.client_phone|phone }}</a>
+                                        </p>
+                                        {% endif %}
+                                    </div>
+                                    {% else %}
+                                    <!-- Client View -->
+                                    <div class="realtor-info">
+                                        <h6 class="text-dark">Your Realtor:</h6>
+                                        <p class="mb-1">
+                                            <i class="fas fa-user-tie me-1"></i>
+                                            <a href="{{ url_for('realtor.realtor_profile', realtor_id=appointment.realtor.id) }}" 
+                                               class="text-decoration-none">
+                                                {{ appointment.realtor.full_name }}
+                                            </a>
+                                        </p>
+                                        {% if appointment.realtor.phone %}
+                                        <p class="mb-1">
+                                            <i class="fas fa-phone me-1"></i>
+                                            <a href="tel:{{ appointment.realtor.phone }}">{{ appointment.realtor.phone|phone }}</a>
+                                        </p>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if appointment.notes %}
+                                    <div class="appointment-notes mt-2">
+                                        <h6 class="text-dark">Notes:</h6>
+                                        <p class="text-muted small">{{ appointment.notes }}</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="appointment-actions mt-3 pt-3 border-top">
+                                    {% if current_user.role == 'realtor' %}
+                                    <div class="btn-group w-100" role="group">
+                                        {% if appointment.realtor.phone %}
+                                        <a href="tel:{{ appointment.client_phone or appointment.client.phone }}" 
+                                           class="btn btn-outline-success btn-sm">
+                                            <i class="fas fa-phone"></i>
+                                        </a>
+                                        {% endif %}
+                                        {% if appointment.client_email or appointment.client %}
+                                        <a href="mailto:{{ appointment.client_email or appointment.client.email }}" 
+                                           class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-envelope"></i>
+                                        </a>
+                                        {% endif %}
+                                        <a href="{{ url_for('property.property_detail', property_id=appointment.property.id) }}" 
+                                           class="btn btn-outline-secondary btn-sm">
+                                            <i class="fas fa-home"></i> Property
+                                        </a>
+                                    </div>
+                                    {% else %}
+                                    <div class="btn-group w-100" role="group">
+                                        <a href="tel:{{ appointment.realtor.phone }}" 
+                                           class="btn btn-outline-success btn-sm">
+                                            <i class="fas fa-phone"></i> Call
+                                        </a>
+                                        <a href="mailto:{{ appointment.realtor.email }}" 
+                                           class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-envelope"></i> Email
+                                        </a>
+                                        <a href="{{ url_for('property.property_detail', property_id=appointment.property.id) }}" 
+                                           class="btn btn-outline-secondary btn-sm">
+                                            <i class="fas fa-home"></i> Property
+                                        </a>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Past Appointments -->
+            {% if past_appointments %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>Past Appointments ({{ past_appointments|length }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>Property</th>
+                                    {% if current_user.role == 'realtor' %}
+                                    <th>Client</th>
+                                    {% else %}
+                                    <th>Realtor</th>
+                                    {% endif %}
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in past_appointments|sort(attribute='appointment_date', reverse=true) %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold">{{ appointment.appointment_date.strftime('%B %d, %Y') }}</div>
+                                        <small class="text-muted">{{ appointment.appointment_date.strftime('%I:%M %p') }}</small>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('property.property_detail', property_id=appointment.property.id) }}" 
+                                           class="text-decoration-none">
+                                            {{ appointment.property.title }}
+                                        </a>
+                                        <br>
+                                        <small class="text-muted">{{ appointment.property.city }}</small>
+                                    </td>
+                                    {% if current_user.role == 'realtor' %}
+                                    <td>
+                                        {{ appointment.client_name or (appointment.client.full_name if appointment.client else 'N/A') }}
+                                        {% if appointment.client_phone %}
+                                        <br>
+                                        <small class="text-muted">{{ appointment.client_phone|phone }}</small>
+                                        {% endif %}
+                                    </td>
+                                    {% else %}
+                                    <td>
+                                        <a href="{{ url_for('realtor.realtor_profile', realtor_id=appointment.realtor.id) }}" 
+                                           class="text-decoration-none">
+                                            {{ appointment.realtor.full_name }}
+                                        </a>
+                                        {% if appointment.realtor.phone %}
+                                        <br>
+                                        <small class="text-muted">{{ appointment.realtor.phone|phone }}</small>
+                                        {% endif %}
+                                    </td>
+                                    {% endif %}
+                                    <td>
+                                        <span class="badge bg-secondary">{{ appointment.appointment_type.title() }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if appointment.status == 'completed' else 'danger' if appointment.status == 'cancelled' else 'secondary' }}">
+                                            {{ appointment.status.title() }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <!-- No Appointments -->
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-calendar-times fa-4x text-muted mb-4"></i>
+                <h4 class="text-muted">No Appointments</h4>
+                {% if current_user.role == 'realtor' %}
+                <p class="text-muted mb-4">You don't have any scheduled appointments yet. Clients can book appointments through your property listings.</p>
+                <a href="{{ url_for('property.add_property') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus me-2"></i>Add a Property
+                </a>
+                {% else %}
+                <p class="text-muted mb-4">You haven't scheduled any property viewings yet. Browse our properties and book appointments with our realtors.</p>
+                <a href="{{ url_for('property.properties') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-search me-2"></i>Browse Properties
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.appointment-card {
+    background: var(--light-gray);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.appointment-card:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.appointment-header {
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 1rem;
+}
+
+.date-number {
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.date-month {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+}
+
+.time-display {
+    font-size: 1.1rem;
+}
+
+.duration {
+    font-size: 0.85rem;
+}
+
+.property-title a {
+    color: var(--primary-blue);
+}
+
+.property-title a:hover {
+    color: var(--ocean-blue);
+}
+
+.client-info, .realtor-info {
+    background: rgba(var(--primary-blue), 0.05);
+    padding: 0.75rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.appointment-notes {
+    background: rgba(var(--sunset-orange), 0.1);
+    padding: 0.75rem;
+    border-radius: 8px;
+}
+
+.btn-group .btn {
+    flex: 1;
+}
+</style>
+{% endblock %}

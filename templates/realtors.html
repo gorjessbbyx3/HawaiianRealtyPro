@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}Realtors - Hawaii Elite Realty{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-4">
+    <!-- Page Header -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="text-primary-blue">
+                <i class="fas fa-users me-2"></i>Meet Our Expert Realtors
+            </h1>
+            <p class="lead text-muted">Professional real estate agents dedicated to finding your perfect Hawaiian home</p>
+        </div>
+    </div>
+
+    <!-- Realtors Grid -->
+    <div class="row">
+        {% for realtor in realtors %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="realtor-card">
+                <div class="realtor-avatar">
+                    {% if realtor.profile_image %}
+                        <img src="{{ url_for('static', filename=realtor.profile_image) }}" 
+                             alt="{{ realtor.full_name }}" class="w-100 h-100 object-fit-cover">
+                    {% else %}
+                        {{ realtor.first_name[0] }}{{ realtor.last_name[0] }}
+                    {% endif %}
+                </div>
+                
+                <h4 class="realtor-name">{{ realtor.full_name }}</h4>
+                <p class="realtor-title">
+                    <i class="fas fa-certificate me-1"></i>
+                    Licensed Real Estate Professional
+                </p>
+                
+                {% if realtor.license_number %}
+                <p class="text-muted small">License: {{ realtor.license_number }}</p>
+                {% endif %}
+                
+                {% if realtor.bio %}
+                <p class="text-muted">{{ realtor.bio[:120] }}{% if realtor.bio|length > 120 %}...{% endif %}</p>
+                {% endif %}
+                
+                {% if realtor.specializations %}
+                <div class="specializations mb-3">
+                    <strong class="text-primary">Specializations:</strong>
+                    <p class="text-muted small">{{ realtor.specializations[:100] }}{% if realtor.specializations|length > 100 %}...{% endif %}</p>
+                </div>
+                {% endif %}
+                
+                <div class="realtor-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ realtor.properties|length }}</div>
+                        <div class="stat-label">Active Listings</div>
+                    </div>
+                    {% if realtor.years_experience %}
+                    <div class="stat-item">
+                        <div class="stat-number">{{ realtor.years_experience }}</div>
+                        <div class="stat-label">Years Experience</div>
+                    </div>
+                    {% endif %}
+                    <div class="stat-item">
+                        <div class="stat-number">4.9</div>
+                        <div class="stat-label">Client Rating</div>
+                    </div>
+                </div>
+                
+                <div class="realtor-actions">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <a href="{{ url_for('realtor.realtor_profile', realtor_id=realtor.id) }}" 
+                               class="btn btn-primary w-100">
+                                <i class="fas fa-user me-1"></i>View Profile
+                            </a>
+                        </div>
+                        {% if realtor.phone %}
+                        <div class="col-6">
+                            <a href="tel:{{ realtor.phone }}" class="btn btn-success w-100">
+                                <i class="fas fa-phone me-1"></i>Call
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row g-2 mt-2">
+                        <div class="col-6">
+                            <a href="mailto:{{ realtor.email }}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-envelope me-1"></i>Email
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{{ url_for('property.properties', realtor_id=realtor.id) }}" 
+                               class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-home me-1"></i>Listings
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Contact Hours -->
+                <div class="contact-hours mt-3 pt-3 border-top">
+                    <small class="text-muted">
+                        <i class="fas fa-clock me-1"></i>
+                        Available Mon-Sat 9AM-6PM, Sun 12PM-5PM
+                    </small>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- No Realtors -->
+    {% if not realtors %}
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-user-tie fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No Realtors Available</h4>
+                <p class="text-muted">Please check back later for our team of professional realtors</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Call to Action -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="cta-section bg-primary text-white rounded-3 p-5 text-center">
+                <h3 class="mb-3">Looking for Your Dream Home?</h3>
+                <p class="lead mb-4">Our expert realtors are here to help you find the perfect property in Hawaii</p>
+                <div class="cta-buttons">
+                    <a href="{{ url_for('property.properties') }}" class="btn btn-light btn-lg me-3">
+                        <i class="fas fa-search me-2"></i>Browse Properties
+                    </a>
+                    <a href="{{ url_for('main.contact') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-envelope me-2"></i>Contact Us
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Why Choose Our Realtors -->
+    <div class="row mt-5">
+        <div class="col-12 text-center mb-4">
+            <h3 class="text-primary-blue">Why Choose Our Realtors?</h3>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="feature-highlight text-center">
+                <div class="feature-icon text-primary-blue mb-3">
+                    <i class="fas fa-medal fa-3x"></i>
+                </div>
+                <h5>Licensed Professionals</h5>
+                <p class="text-muted">All our realtors are fully licensed and certified real estate professionals with extensive market knowledge.</p>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="feature-highlight text-center">
+                <div class="feature-icon text-tropical-green mb-3">
+                    <i class="fas fa-map-marked-alt fa-3x"></i>
+                </div>
+                <h5>Local Market Experts</h5>
+                <p class="text-muted">Deep understanding of Hawaiian real estate markets, neighborhoods, and property values across all islands.</p>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="feature-highlight text-center">
+                <div class="feature-icon text-sunset-orange mb-3">
+                    <i class="fas fa-handshake fa-3x"></i>
+                </div>
+                <h5>Personalized Service</h5>
+                <p class="text-muted">Dedicated to providing personalized attention and tailored solutions for each client's unique needs.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.realtor-card {
+    height: 100%;
+    transition: all 0.3s ease;
+}
+
+.realtor-card:hover {
+    transform: translateY(-5px);
+}
+
+.realtor-actions .btn {
+    font-size: 0.875rem;
+    padding: 0.5rem;
+}
+
+.specializations {
+    background: var(--light-gray);
+    padding: 0.75rem;
+    border-radius: 8px;
+}
+
+.contact-hours {
+    background: rgba(var(--primary-blue), 0.1);
+    padding: 0.5rem;
+    border-radius: 5px;
+}
+
+.cta-section {
+    background: linear-gradient(135deg, var(--primary-blue), var(--ocean-blue)) !important;
+}
+
+.feature-highlight {
+    padding: 2rem 1rem;
+    height: 100%;
+}
+
+.feature-highlight:hover .feature-icon {
+    transform: scale(1.1);
+    transition: transform 0.3s ease;
+}
+</style>
+{% endblock %}

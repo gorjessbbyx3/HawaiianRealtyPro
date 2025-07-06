@@ -1,0 +1,532 @@
+{% extends "base.html" %}
+
+{% block title %}Virtual Tour - {{ property.title }} - Hawaii Elite Realty{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-5 pt-4">
+    <!-- Property Header -->
+    <div class="container mb-4">
+        <div class="row">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{{ url_for('property.properties') }}">Properties</a></li>
+                        <li class="breadcrumb-item"><a href="{{ url_for('property.property_detail', property_id=property.id) }}">{{ property.title }}</a></li>
+                        <li class="breadcrumb-item active">Virtual Tour</li>
+                    </ol>
+                </nav>
+                
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="text-primary-blue">{{ property.title }}</h1>
+                        <p class="text-muted mb-0">
+                            <i class="fas fa-map-marker-alt me-2"></i>
+                            {{ property.address }}, {{ property.city }}, {{ property.state }}
+                        </p>
+                    </div>
+                    <div class="text-end">
+                        <div class="property-price-large text-success">{{ property.formatted_price }}</div>
+                        <a href="{{ url_for('property.property_detail', property_id=property.id) }}" 
+                           class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Property
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if property.virtual_tour_url %}
+    <!-- Virtual Tour Viewer -->
+    <div class="virtual-tour-viewer">
+        <div class="tour-container">
+            <div class="tour-loading" id="tour-loading">
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner fa-spin fa-3x text-primary"></i>
+                    <p class="mt-3">Loading Virtual Tour...</p>
+                </div>
+            </div>
+            
+            <iframe id="virtual-tour-frame" 
+                    src="{{ property.virtual_tour_url }}" 
+                    frameborder="0" 
+                    allowfullscreen 
+                    allow="vr,gyroscope,accelerometer"
+                    onload="hideLoading()">
+            </iframe>
+        </div>
+        
+        <!-- Tour Controls -->
+        <div class="tour-controls">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="tour-info">
+                            <h5 class="mb-1">{{ property.title }}</h5>
+                            <p class="mb-0 text-muted">Interactive Virtual Tour</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <div class="tour-actions">
+                            <button type="button" class="btn btn-outline-light me-2" onclick="toggleFullscreen()">
+                                <i class="fas fa-expand"></i> Fullscreen
+                            </button>
+                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#bookingModal">
+                                <i class="fas fa-calendar-plus me-1"></i>Schedule Visit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- No Virtual Tour Available -->
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="no-tour-available">
+                    <div class="text-center py-5">
+                        <i class="fas fa-vr-cardboard fa-4x text-muted mb-4"></i>
+                        <h3 class="text-muted">Virtual Tour Not Available</h3>
+                        <p class="text-muted mb-4">
+                            A virtual tour is not currently available for this property. 
+                            Please view the property photos or schedule an in-person viewing.
+                        </p>
+                        <div class="d-flex justify-content-center gap-3">
+                            <a href="{{ url_for('property.property_detail', property_id=property.id) }}" 
+                               class="btn btn-primary">
+                                <i class="fas fa-images me-2"></i>View Photos
+                            </a>
+                            <a href="{{ url_for('booking.book_appointment', property_id=property.id) }}" 
+                               class="btn btn-success">
+                                <i class="fas fa-calendar-plus me-2"></i>Schedule Visit
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Property Details Sidebar (Fixed) -->
+<div class="property-sidebar" id="property-sidebar">
+    <div class="sidebar-toggle" onclick="toggleSidebar()">
+        <i class="fas fa-chevron-left"></i>
+    </div>
+    
+    <div class="sidebar-content">
+        <div class="property-summary">
+            {% if property.main_image %}
+            <div class="property-thumbnail">
+                <img src="{{ url_for('static', filename=property.main_image) }}" 
+                     alt="{{ property.title }}" class="w-100">
+            </div>
+            {% endif %}
+            
+            <h6 class="property-title">{{ property.title }}</h6>
+            <p class="property-location">
+                <i class="fas fa-map-marker-alt me-1"></i>
+                {{ property.city }}, {{ property.state }}
+            </p>
+            <p class="property-price">{{ property.formatted_price }}</p>
+            
+            <div class="property-features">
+                {% if property.bedrooms %}
+                <div class="feature-item">
+                    <i class="fas fa-bed"></i>
+                    <span>{{ property.bedrooms }} bed</span>
+                </div>
+                {% endif %}
+                {% if property.bathrooms %}
+                <div class="feature-item">
+                    <i class="fas fa-bath"></i>
+                    <span>{{ property.bathrooms }} bath</span>
+                </div>
+                {% endif %}
+                {% if property.square_feet %}
+                <div class="feature-item">
+                    <i class="fas fa-expand-arrows-alt"></i>
+                    <span>{{ "{:,}".format(property.square_feet) }} sqft</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="realtor-info">
+            <h6>Your Realtor</h6>
+            <div class="d-flex align-items-center">
+                <div class="realtor-avatar me-2">
+                    {% if property.realtor.profile_image %}
+                        <img src="{{ url_for('static', filename=property.realtor.profile_image) }}" 
+                             alt="{{ property.realtor.full_name }}" class="w-100 h-100 object-fit-cover">
+                    {% else %}
+                        <div class="avatar-placeholder">
+                            {{ property.realtor.first_name[0] }}{{ property.realtor.last_name[0] }}
+                        </div>
+                    {% endif %}
+                </div>
+                <div>
+                    <div class="fw-bold">{{ property.realtor.full_name }}</div>
+                    {% if property.realtor.phone %}
+                    <small class="text-muted">{{ property.realtor.phone|phone }}</small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="sidebar-actions">
+            <a href="tel:{{ property.realtor.phone }}" class="btn btn-success w-100 mb-2">
+                <i class="fas fa-phone me-1"></i>Call Now
+            </a>
+            <a href="{{ url_for('booking.book_appointment', property_id=property.id) }}" 
+               class="btn btn-primary w-100 mb-2">
+                <i class="fas fa-calendar-plus me-1"></i>Schedule Visit
+            </a>
+            <button type="button" class="btn btn-outline-secondary w-100" 
+                    data-bs-toggle="modal" data-bs-target="#inquiryModal">
+                <i class="fas fa-envelope me-1"></i>Send Inquiry
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Booking Modal -->
+<div class="modal fade" id="bookingModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Schedule Property Visit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted">Interested in seeing this property in person? Schedule a visit with our realtor.</p>
+                <div class="text-center">
+                    <a href="{{ url_for('booking.book_appointment', property_id=property.id) }}" 
+                       class="btn btn-success btn-lg">
+                        <i class="fas fa-calendar-plus me-2"></i>Book Appointment
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Inquiry Modal -->
+<div class="modal fade" id="inquiryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Send Inquiry</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ url_for('property.property_inquiry', property_id=property.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Phone</label>
+                        <input type="tel" name="phone" class="form-control">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Message</label>
+                        <textarea name="message" class="form-control" rows="3" 
+                                  placeholder="I'm interested in this property and would like more information..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-paper-plane me-2"></i>Send Inquiry
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.virtual-tour-viewer {
+    height: calc(100vh - 200px);
+    min-height: 600px;
+    position: relative;
+    background: #000;
+}
+
+.tour-container {
+    height: calc(100% - 80px);
+    position: relative;
+}
+
+.tour-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    color: white;
+}
+
+.loading-spinner {
+    text-align: center;
+}
+
+#virtual-tour-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.tour-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(135deg, var(--primary-blue), var(--ocean-blue));
+    color: white;
+    padding: 1rem 0;
+}
+
+.tour-info h5 {
+    color: white;
+}
+
+.no-tour-available {
+    background: var(--light-gray);
+    border-radius: 15px;
+    margin: 2rem 0;
+}
+
+.property-sidebar {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    width: 320px;
+    background: white;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+    border-radius: 15px 0 0 15px;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+}
+
+.property-sidebar.collapsed {
+    transform: translateY(-50%) translateX(280px);
+}
+
+.sidebar-toggle {
+    position: absolute;
+    left: -40px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 60px;
+    background: var(--primary-blue);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px 0 0 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sidebar-toggle:hover {
+    background: var(--ocean-blue);
+}
+
+.sidebar-content {
+    padding: 1.5rem;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.property-summary {
+    margin-bottom: 1.5rem;
+}
+
+.property-thumbnail {
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.property-thumbnail img {
+    height: 120px;
+    object-fit: cover;
+}
+
+.property-title {
+    color: var(--primary-blue);
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.property-location {
+    color: var(--medium-gray);
+    margin-bottom: 0.5rem;
+}
+
+.property-price {
+    color: var(--tropical-green);
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.property-features {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--medium-gray);
+    font-size: 0.9rem;
+}
+
+.realtor-info {
+    padding: 1rem;
+    background: var(--light-gray);
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.realtor-info h6 {
+    color: var(--dark-blue);
+    margin-bottom: 0.75rem;
+}
+
+.realtor-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid var(--primary-blue);
+}
+
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--primary-blue), var(--tropical-green));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.sidebar-actions .btn {
+    font-size: 0.9rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .virtual-tour-viewer {
+        height: calc(100vh - 150px);
+    }
+    
+    .property-sidebar {
+        width: 100%;
+        position: relative;
+        transform: none;
+        margin-top: 2rem;
+        border-radius: 15px;
+    }
+    
+    .sidebar-toggle {
+        display: none;
+    }
+    
+    .tour-controls .container {
+        padding: 0 1rem;
+    }
+    
+    .tour-actions {
+        margin-top: 1rem;
+        text-align: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .tour-actions .btn {
+        display: block;
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .tour-actions .btn:last-child {
+        margin-bottom: 0;
+    }
+}
+</style>
+
+<script>
+function hideLoading() {
+    const loading = document.getElementById('tour-loading');
+    if (loading) {
+        loading.style.display = 'none';
+    }
+}
+
+function toggleFullscreen() {
+    const frame = document.getElementById('virtual-tour-frame');
+    if (frame.requestFullscreen) {
+        frame.requestFullscreen();
+    } else if (frame.webkitRequestFullscreen) {
+        frame.webkitRequestFullscreen();
+    } else if (frame.msRequestFullscreen) {
+        frame.msRequestFullscreen();
+    }
+}
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('property-sidebar');
+    const toggle = sidebar.querySelector('.sidebar-toggle i');
+    
+    sidebar.classList.toggle('collapsed');
+    
+    if (sidebar.classList.contains('collapsed')) {
+        toggle.className = 'fas fa-chevron-right';
+    } else {
+        toggle.className = 'fas fa-chevron-left';
+    }
+}
+
+// Auto-hide loading after 10 seconds
+setTimeout(hideLoading, 10000);
+
+// Handle iframe loading errors
+document.getElementById('virtual-tour-frame').onerror = function() {
+    hideLoading();
+    document.querySelector('.tour-container').innerHTML = `
+        <div class="text-center text-white py-5">
+            <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+            <h4>Unable to Load Virtual Tour</h4>
+            <p>There was an issue loading the virtual tour. Please try again later.</p>
+        </div>
+    `;
+};
+</script>
+{% endblock %}

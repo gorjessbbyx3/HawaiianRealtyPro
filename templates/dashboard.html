@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Hawaii Elite Realty{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="text-primary-blue">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                </h1>
+                <div class="text-muted">
+                    Welcome back, {{ current_user.first_name }}!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if current_user.role == 'realtor' %}
+    <!-- Realtor Dashboard -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.total_properties }}</div>
+                <div class="stat-title">Total Properties</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, var(--tropical-green), #009966);">
+                <div class="stat-value">{{ stats.active_properties }}</div>
+                <div class="stat-title">Active Listings</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, var(--sunset-orange), #e67a37);">
+                <div class="stat-value">{{ stats.pending_properties }}</div>
+                <div class="stat-title">Pending Sales</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, var(--dark-blue), #002d5f);">
+                <div class="stat-value">{{ stats.sold_properties }}</div>
+                <div class="stat-title">Sold Properties</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="dashboard-card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Property Statistics
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="property-stats-chart" 
+                            data-active="{{ stats.active_properties }}"
+                            data-pending="{{ stats.pending_properties }}"
+                            data-sold="{{ stats.sold_properties }}"
+                            style="height: 250px;"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="dashboard-card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users me-2"></i>Lead Pipeline
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-3">
+                            <div class="stat-number text-success">{{ stats.new_leads }}</div>
+                            <div class="stat-label">New</div>
+                        </div>
+                        <div class="col-3">
+                            <div class="stat-number text-primary">0</div>
+                            <div class="stat-label">Contacted</div>
+                        </div>
+                        <div class="col-3">
+                            <div class="stat-number text-warning">0</div>
+                            <div class="stat-label">Qualified</div>
+                        </div>
+                        <div class="col-3">
+                            <div class="stat-number text-success">0</div>
+                            <div class="stat-label">Converted</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-home me-2"></i>Your Properties
+                        </h5>
+                        <a href="{{ url_for('property.add_property') }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus me-1"></i>Add Property
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if properties %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Property</th>
+                                        <th>Price</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for property in properties[:5] %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="property-thumbnail me-3">
+                                                    {% if property.main_image %}
+                                                        <img src="{{ url_for('static', filename=property.main_image) }}" 
+                                                             class="rounded" width="50" height="50" style="object-fit: cover;">
+                                                    {% else %}
+                                                        <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                                             style="width: 50px; height: 50px;">
+                                                            <i class="fas fa-home text-muted"></i>
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold">{{ property.title }}</div>
+                                                    <small class="text-muted">{{ property.city }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="fw-bold">{{ property.formatted_price }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if property.status == 'active' else 'warning' if property.status == 'pending' else 'secondary' }}">
+                                                {{ property.status.title() }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('property.property_detail', property_id=property.id) }}" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% if properties|length > 5 %}
+                        <div class="text-center">
+                            <a href="{{ url_for('property.properties') }}" class="btn btn-outline-primary">
+                                View All Properties
+                            </a>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-home fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No Properties Yet</h5>
+                            <p class="text-muted">Start by adding your first property listing</p>
+                            <a href="{{ url_for('property.add_property') }}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Add Your First Property
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Upcoming Appointments -->
+            <div class="dashboard-card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar me-2"></i>Upcoming Appointments
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_appointments %}
+                        {% for appointment in upcoming_appointments %}
+                        <div class="d-flex align-items-center mb-3 p-2 bg-light rounded">
+                            <div class="me-3">
+                                <div class="text-primary fw-bold">
+                                    {{ appointment.appointment_date.strftime('%b %d') }}
+                                </div>
+                                <small class="text-muted">
+                                    {{ appointment.appointment_date.strftime('%I:%M %p') }}
+                                </small>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold">{{ appointment.client_name or appointment.client.full_name }}</div>
+                                <small class="text-muted">{{ appointment.property.title[:30] }}...</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <a href="{{ url_for('booking.appointments') }}" class="btn btn-outline-primary btn-sm w-100">
+                            View All Appointments
+                        </a>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-calendar-times fa-2x text-muted mb-2"></i>
+                            <p class="text-muted mb-0">No upcoming appointments</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recent Leads -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-friends me-2"></i>Recent Leads
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_leads %}
+                        {% for lead in recent_leads %}
+                        <div class="d-flex align-items-center mb-3 p-2 bg-light rounded">
+                            <div class="me-3">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                     style="width: 40px; height: 40px;">
+                                    {{ lead.name[0].upper() }}
+                                </div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold">{{ lead.name }}</div>
+                                <small class="text-muted">{{ lead.email }}</small>
+                                <div>
+                                    <span class="badge bg-{{ 'success' if lead.status == 'new' else 'primary' }} badge-sm">
+                                        {{ lead.status.title() }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <a href="{{ url_for('crm.leads') }}" class="btn btn-outline-primary btn-sm w-100">
+                            View All Leads
+                        </a>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-user-times fa-2x text-muted mb-2"></i>
+                            <p class="text-muted mb-0">No recent leads</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- Client Dashboard -->
+    <div class="row">
+        <div class="col-12">
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar me-2"></i>Your Appointments
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if appointments %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Property</th>
+                                        <th>Realtor</th>
+                                        <th>Date & Time</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for appointment in appointments %}
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold">{{ appointment.property.title }}</div>
+                                            <small class="text-muted">{{ appointment.property.address }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="fw-bold">{{ appointment.realtor.full_name }}</div>
+                                            <small class="text-muted">{{ appointment.realtor.phone|phone if appointment.realtor.phone }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="fw-bold">{{ appointment.appointment_date.strftime('%B %d, %Y') }}</div>
+                                            <small class="text-muted">{{ appointment.appointment_date.strftime('%I:%M %p') }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if appointment.status == 'scheduled' else 'secondary' }}">
+                                                {{ appointment.status.title() }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-calendar-plus fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No Appointments Yet</h5>
+                            <p class="text-muted">Browse properties and schedule viewings with our realtors</p>
+                            <a href="{{ url_for('property.properties') }}" class="btn btn-primary">
+                                <i class="fas fa-search me-2"></i>Browse Properties
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
